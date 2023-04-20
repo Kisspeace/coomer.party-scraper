@@ -31,7 +31,7 @@ function GetElementByClass(AElement: IHtmlElement; AClass: string): IHtmlElement
 var
   List: IHtmlElementList;
 begin
-  List := AElement.FindX('/*[@class="' + AClass + '"]');
+  List := AElement.FindX('//*[@class="' + AClass + '"]');
   if ( List.Count > 0 ) then
     Result := List.Items[0]
   else
@@ -66,7 +66,7 @@ begin
 
       //Artist name
       try
-        Tmp := E.FindX('/*[@class="user-card__name"]/a')[0];
+        Tmp := E.FindX('//*[@class="user-card__name"]/a')[0];
         LArtist.Name := Tmp.Text;
       except
 
@@ -112,7 +112,7 @@ begin
     end;
 
     //Content text
-    Tmps := E.FindX('[@class="post-card__heading"]/h2');
+    Tmps := E.FindX('//*[@class="post-card__heading"]');
     if ( Tmps.Count > 0 ) then begin
       Tmp := Tmps[0];
       if Assigned(Tmp) then

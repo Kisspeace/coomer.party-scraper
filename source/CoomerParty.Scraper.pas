@@ -13,6 +13,8 @@ const
 
   URL_COOMER_PARTY = 'https://coomer.party';
   URL_KEMONO_PARTY = 'https://kemono.party';
+  URL_COOMER_SU = 'https://coomer.su';
+  URL_KEMONO_SU = 'https://kemono.su';
 
 type
 

@@ -3,7 +3,7 @@ unit CoomerParty.HTMLParser;
 
 interface
 uses
-  Sysutils, CoomerParty.Types, Classes,
+  Sysutils, CoomerParty.Types, Classes, Net.URLClient,
   {*Net.Encoding*}
   NetEncoding,
   {*htmlparser*}
@@ -26,6 +26,13 @@ const
   function ParsePostPage(const AContent: string): TPartyPostPage;
 
 implementation
+
+function FixUrl(const AUrl: string): string;
+begin
+  Result := AUrl;
+  if Result.StartsWith('//') then
+    Result := TURI.SCHEME_HTTPS + ':' + Result;
+end;
 
 function GetElementByClass(AElement: IHtmlElement; AClass: string): IHtmlElement;
 var
@@ -108,11 +115,11 @@ begin
     //Thumbnail
     Tmp := GetElementByClass(E, 'post-card__image');
     if Assigned(Tmp) then begin
-      LPost.Thumbnail := Tmp.Attributes['src'];
+      LPost.Thumbnail := FixUrl(Tmp.Attributes['src']);
     end;
 
     //Content text
-    Tmps := E.FindX('//*[@class="post-card__heading"]');
+    Tmps := E.FindX('//*[@class="post-card__header"]');
     if ( Tmps.Count > 0 ) then begin
       Tmp := Tmps[0];
       if Assigned(Tmp) then
@@ -194,18 +201,18 @@ begin
   end;
 
   // Content
-  Nodes := Doc.FindX('body/*[@class="post__content"]/pre');
+  Nodes := Doc.FindX('body/*[@class="post__content"]');
   if ( Nodes.Count > 0 ) then begin
-    Result.Content := Nodes[0].Text;
+    Result.Content := Trim(Nodes[0].Text);
   end;
 
   // Thumbnails and full image urls
   Nodes := Doc.FindX('body/*[@class="fileThumb"]');
   for I := 0 to Nodes.Count - 1 do begin
-    Result.Files := Result.Files + [Nodes[I].Attributes['href']];
+    Result.Files := Result.Files + [FixUrl(Nodes[I].Attributes['href'])];
     try
       Tmp := Nodes[I].Find('img')[0];
-      Result.Thumbnails := Result.Thumbnails + [Tmp.Attributes['src']];
+      Result.Thumbnails := Result.Thumbnails + [FixUrl(Tmp.Attributes['src'])];
     except
 
     end;
@@ -214,7 +221,7 @@ begin
   // Attachments
   Nodes := Doc.FindX('body/*[@class="post__attachment-link"]');
   for I := 0 to Nodes.Count - 1 do
-    Result.Files := Result.Files + [Nodes[I].Attributes['href']];
+    Result.Files := Result.Files + [FixUrl(Nodes[I].Attributes['href'])];
 
 end;
 
